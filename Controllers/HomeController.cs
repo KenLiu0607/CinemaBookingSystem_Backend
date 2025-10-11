@@ -1,43 +1,27 @@
-//using Backend.Attributes;
-//using Backend.Data;
-//using Backend.Models;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using System.Diagnostics;
+using Backend.Data;
+using Backend.Models; // 依你的命名空間調整
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-//namespace Backend.Controllers
-//{
-//    public class HomeController : Controller
-//    {
-//        private readonly ILogger<HomeController> _logger;
-//        private readonly CinemaDbContext _db;
+namespace Backend.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HomeController : ControllerBase
+    {
+        private readonly CinemaDbContext _context;
 
-//        public HomeController(ILogger<HomeController> logger, CinemaDbContext context)
-//        {
-//            _logger = logger;
-//            _db = context;
-//        }
-//        public IActionResult Index()
-//        {
-//            return View();
-//        }
+        public HomeController(CinemaDbContext context)
+        {
+            _context = context;
+        }
 
-//        public IActionResult Privacy()
-//        {
-//            return View();
-//        }
-
-//        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-//        public IActionResult Error()
-//        {
-//            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-//        }
-
-//        [AuditLog]
-//        public void CreateUser(string user)
-//        {
-//            // Logic to create a user
-//        }
-
-//    }
-//}
+        // GET api/Movie
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Movie>>> GetMovies()
+        {
+            List<Movie> movies = await _context.Movies.ToListAsync();
+            return Ok(movies);
+        }
+    }
+}
