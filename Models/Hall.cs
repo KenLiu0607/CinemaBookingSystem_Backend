@@ -7,11 +7,9 @@ public partial class Hall
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public int SeatLayoutId { get; set; }
 
-    public string Type { get; set; } = null!;
+    public string HallName { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
-
-    public TimeOnly? Opentime { get; set; }
+    public string? Description { get; set; }
 }
