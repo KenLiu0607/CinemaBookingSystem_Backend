@@ -15,11 +15,13 @@ public partial class Movie
 
     public string? CastInfo { get; set; }
 
-    public DateOnly? ReleaseDate { get; set; }
-
     public string? Rating { get; set; }
 
     public string? Genre { get; set; }
 
     public string FileName { get; set; } = null!;
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
 }

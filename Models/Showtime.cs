@@ -11,5 +11,7 @@ public partial class Showtime
 
     public int MovieId { get; set; }
 
-    public DateTime StartTime { get; set; }
+    public int ShowtimeSlotId { get; set; }
+
+    public DateOnly? Date { get; set; }
 }

@@ -34,7 +34,13 @@ public partial class CinemaDbContext : DbContext
 
     public virtual DbSet<Showtime> Showtimes { get; set; }
 
+    public virtual DbSet<ShowtimeSlot> ShowtimeSlots { get; set; }
+
     public virtual DbSet<Ticket> Tickets { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=ep-lingering-sea-a13d2so4.ap-southeast-1.aws.neon.tech; Database=Cinema; Username=neondb_owner; Password=npg_Ch5bmOUWf0nK; SSL Mode=VerifyFull; Channel Binding=Require;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,6 +139,7 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Director)
                 .HasMaxLength(100)
                 .HasColumnName("director");
+            entity.Property(e => e.EndDate).HasColumnName("end_date");
             entity.Property(e => e.FileName)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("''::character varying")
@@ -143,7 +150,7 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Rating)
                 .HasMaxLength(20)
                 .HasColumnName("rating");
-            entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
+            entity.Property(e => e.StartDate).HasColumnName("start_date");
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");
@@ -158,11 +165,11 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.MemberId).HasColumnName("member_id");
             entity.Property(e => e.ReservedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("reserved_at");
+            entity.Property(e => e.SeatReservedId).HasColumnName("seat_reserved_id");
             entity.Property(e => e.TicketId).HasColumnName("ticket_id");
         });
 
@@ -247,12 +254,24 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.Date).HasColumnName("date");
             entity.Property(e => e.HallId).HasColumnName("hall_id");
             entity.Property(e => e.MovieId).HasColumnName("movie_id");
-            entity.Property(e => e.StartTime)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("start_time");
+            entity.Property(e => e.ShowtimeSlotId).HasColumnName("showtime_slot_id");
+        });
+
+        modelBuilder.Entity<ShowtimeSlot>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("showtime_slot_pkey");
+
+            entity.ToTable("showtime_slot");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.SlotName)
+                .HasMaxLength(10)
+                .HasDefaultValueSql("'早場'::character varying")
+                .HasColumnName("slot_name");
+            entity.Property(e => e.SlotTime).HasColumnName("slot_time");
         });
 
         modelBuilder.Entity<Ticket>(entity =>
@@ -264,14 +283,17 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
+            entity.Property(e => e.GuestId).HasColumnName("guest_id");
+            entity.Property(e => e.IsCancelled)
+                .HasDefaultValue(false)
+                .HasColumnName("is_cancelled");
+            entity.Property(e => e.MemberId).HasColumnName("member_id");
             entity.Property(e => e.Price)
                 .HasPrecision(8, 2)
                 .HasColumnName("price");
             entity.Property(e => e.RefundReason)
                 .HasMaxLength(500)
                 .HasColumnName("refund_reason");
-            entity.Property(e => e.SeatId).HasColumnName("seat_id");
-            entity.Property(e => e.ShowtimeId).HasColumnName("showtime_id");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
