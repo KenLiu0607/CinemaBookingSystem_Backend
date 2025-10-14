@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Models;
+namespace Backend.Data;
 
 public partial class Member
 {
@@ -11,9 +11,9 @@ public partial class Member
 
     public string ContactInfo { get; set; } = null!;
 
-    public int? Points { get; set; }
+    public int Points { get; set; }
 
-    public string? Level { get; set; }
+    public string Level { get; set; } = null!;
 
     public string Password { get; set; } = null!;
 

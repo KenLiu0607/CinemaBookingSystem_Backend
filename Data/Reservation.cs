@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Models;
+namespace Backend.Data;
 
 public partial class Reservation
 {
@@ -9,7 +9,9 @@ public partial class Reservation
 
     public int TicketId { get; set; }
 
-    public int? SeatReservedId { get; set; }
+    public int ShowtimeId { get; set; }
 
-    public DateTime ReservedAt { get; set; }
+    public int? SeatId { get; set; }
+
+    public DateOnly ReservationAt { get; set; }
 }

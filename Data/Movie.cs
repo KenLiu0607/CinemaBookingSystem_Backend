@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Models;
+namespace Backend.Data;
 
 public partial class Movie
 {
@@ -19,7 +19,7 @@ public partial class Movie
 
     public string? Genre { get; set; }
 
-    public string FileName { get; set; } = null!;
+    public string? FileName { get; set; }
 
     public DateOnly StartDate { get; set; }
 

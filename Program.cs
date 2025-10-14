@@ -1,14 +1,18 @@
 using Backend.Data;
+using Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
-//builder.Services.AddControllersWithViews();
-
 builder.Services.AddDbContext<CinemaDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonConnection")));
+
+
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddAllServices();
+
+
 
 var app = builder.Build();
 
