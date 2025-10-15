@@ -75,74 +75,76 @@ namespace Backend.Services
             return await query.ToListAsync();
         }
 
+        /// <summary>
+        /// 取得影院訂位的ViewModel
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<BookingViewModel>> GetBookingViewModelAsync()
         {
             List<BookingDTO> data = await GetBookingDTOAsync();
 
+            //組出BookingViewModel
             var result = data.GroupBy(g => g.MovieId)
                 .Select(s =>
                 {
-                    BookingViewModel bookVW = new BookingViewModel();
+                    BookingViewModel vm = new BookingViewModel();
+
+                    //電影資訊
                     var movie = s.FirstOrDefault();
                     if (movie != null)
                     {
-                        bookVW.MovieId = movie.MovieId;
-                        bookVW.Title = movie.Title;
-                        bookVW.Description = movie.Description;
-                        bookVW.Director = movie.Director;
-                        bookVW.CastInfo = movie.CastInfo;
-                        bookVW.Rating = movie.Rating;
-                        bookVW.Genre = movie.Genre;
-                        bookVW.FileName = movie.FileName;
-                        bookVW.StartDate = movie.StartDate;
-                        bookVW.EndDate = movie.EndDate;
+                        vm.MovieId = movie.MovieId;
+                        vm.Title = movie.Title;
+                        vm.Description = movie.Description;
+                        vm.Director = movie.Director;
+                        vm.CastInfo = movie.CastInfo;
+                        vm.Rating = movie.Rating;
+                        vm.Genre = movie.Genre;
+                        vm.FileName = movie.FileName;
+                        vm.StartDate = movie.StartDate;
+                        vm.EndDate = movie.EndDate;
                     }
-                    List<Hall> halls = s
+
+                    //廳院
+                    vm.Halls = s
                         .Select(h => new Hall
                         {
-                            Id = h.HallId,
+                            Id = h.HallId,//廳院Id
                             SeatLayoutId = h.SeatLayoutId,
                             Name = h.HallName ?? "",
-                            Description = h.HallDescription ?? ""
-                        })
-                        .DistinctBy(d => d.Id)
-                        .OrderBy(o => o.Id)
-                        .ToList();
-                    List<Showtime> showtimes = s
-                        .Select(st => new Showtime
-                        {
-                            Id = st.ShowtimeId,
-                            MovieId = st.MovieId,
-                            HallId = st.HallId,
-                            ShowtimeSlotId = st.ShowtimeSlotId,
-                            ShowtimeSlotName = st.ShowtimeSlotName ?? "",
-                            ShowtimeSlotTime = st.ShowtimeSlotTime.ToString("hh:mm:ss"),
-                        })
-                        .DistinctBy(d => d.Id)
-                        .OrderBy(o => o.Id)
-                        .ToList();
-                    List<Seat> seats = s
-                        .Select(seat => new Seat
-                        {
-                            Id = seat.SeatId,
-                            SeatLayoutId = seat.SeatLayoutId,
-                            RowNumber = seat.RowNumber,
-                            ColNumber = seat.ColNumber,
-                            Label = seat.Label ?? "",
-                            Type = seat.Type ?? "",
-                            IsActive = seat.IsActive,
-                            IsAisle = seat.IsAisle,
-                            SeatStatus = seat.SeatStatus ?? "不開放",
-                            TicketId = seat.TicketId,
+                            Description = h.HallDescription ?? "",
+                            //座位
+                            Seats = s.Where(ww => ww.SeatLayoutId == h.SeatLayoutId)
+                            .Select(seat => new Seat
+                            {
+                                Id = seat.SeatId,//座位Id
+                                TicketId = seat.TicketId,//訂位Id
+                                SeatLayoutId = seat.SeatLayoutId,//座位配置Id
+                                RowNumber = seat.RowNumber,
+                                ColNumber = seat.ColNumber,
+                                Label = seat.Label ?? "",
+                                Type = seat.Type ?? "",
+                                IsActive = seat.IsActive,
+                                IsAisle = seat.IsAisle,
+                                SeatStatus = seat.SeatStatus ?? "不開放",
+                            }).DistinctBy(d => d.Id).OrderBy(o => o.Id).ToList(),
+                            //場次資訊
+                            Showtimes = s.Where(ww => ww.HallId == h.HallId).Select(st => new Showtime
+                            {
+                                Id = st.ShowtimeId,//場次Id
+                                MovieId = st.MovieId,
+                                HallId = st.HallId,
+                                ShowtimeSlotId = st.ShowtimeSlotId,
+                                ShowtimeSlotName = st.ShowtimeSlotName ?? "",
+                                ShowtimeSlotTime = st.ShowtimeSlotTime.ToString("hh:mm:ss"),
+                            }).DistinctBy(d => d.Id).OrderBy(o => o.Id).ToList(),
+
                         })
                         .DistinctBy(d => d.Id)
                         .OrderBy(o => o.Id)
                         .ToList();
 
-                    bookVW.Halls = halls;
-                    bookVW.ShowTimes = showtimes;
-                    bookVW.Seats = seats;
-                    return bookVW;
+                    return vm;
                 }).ToList();
 
             return result;

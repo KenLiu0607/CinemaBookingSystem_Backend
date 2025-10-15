@@ -31,7 +31,5 @@ namespace Backend.Models
         }
 
         public List<Hall> Halls { get; set; } = null!;
-        public List<Showtime> ShowTimes { get; set; } = null!;
-        public List<Seat> Seats { get; set; } = null!;
     }
 }
