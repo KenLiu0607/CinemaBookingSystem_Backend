@@ -11,7 +11,7 @@ public partial class Ticket
 
     public string Status { get; set; } = null!;
 
-    public string? RefundReason { get; set; }
+    public string RefundReason { get; set; } = null!;
 
     public string TicketType { get; set; } = null!;
 

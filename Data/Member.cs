@@ -17,7 +17,7 @@ public partial class Member
 
     public string Password { get; set; } = null!;
 
-    public string? AvatarFileName { get; set; }
+    public string AvatarFileName { get; set; } = null!;
 
     public string JoinDate { get; set; } = null!;
 

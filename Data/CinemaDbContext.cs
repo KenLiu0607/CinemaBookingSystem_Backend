@@ -35,6 +35,10 @@ public partial class CinemaDbContext : DbContext
 
     public virtual DbSet<Ticket> Tickets { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=ep-lingering-sea-a13d2so4.ap-southeast-1.aws.neon.tech; Database=Cinema; Username=neondb_owner; Password=npg_Ch5bmOUWf0nK; SSL Mode=VerifyFull; Channel Binding=Require;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Guest>(entity =>
@@ -66,6 +70,7 @@ public partial class CinemaDbContext : DbContext
                 .HasColumnName("id");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
+                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("description");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
@@ -84,6 +89,7 @@ public partial class CinemaDbContext : DbContext
                 .HasColumnName("id");
             entity.Property(e => e.AvatarFileName)
                 .HasMaxLength(255)
+                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("avatar_file_name ");
             entity.Property(e => e.ContactInfo)
                 .HasMaxLength(100)
@@ -108,7 +114,6 @@ public partial class CinemaDbContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.Password)
                 .HasMaxLength(255)
-                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("password");
             entity.Property(e => e.Points)
                 .HasDefaultValue(0)
@@ -128,22 +133,33 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.CastInfo).HasColumnName("cast_info");
-            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.CastInfo)
+                .HasDefaultValueSql("''::text")
+                .HasColumnName("cast_info");
+            entity.Property(e => e.Description)
+                .HasDefaultValueSql("''::text")
+                .HasColumnName("description");
             entity.Property(e => e.Director)
                 .HasMaxLength(50)
+                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("director");
-            entity.Property(e => e.EndDate).HasColumnName("end_date");
+            entity.Property(e => e.EndDate)
+                .HasDefaultValueSql("CURRENT_DATE")
+                .HasColumnName("end_date");
             entity.Property(e => e.FileName)
                 .HasMaxLength(255)
                 .HasColumnName("file_name");
             entity.Property(e => e.Genre)
                 .HasMaxLength(50)
+                .HasDefaultValueSql("'愛情'::character varying")
                 .HasColumnName("genre");
             entity.Property(e => e.Rating)
                 .HasMaxLength(20)
+                .HasDefaultValueSql("'保護級'::character varying")
                 .HasColumnName("rating");
-            entity.Property(e => e.StartDate).HasColumnName("start_date");
+            entity.Property(e => e.StartDate)
+                .HasDefaultValueSql("CURRENT_DATE")
+                .HasColumnName("start_date");
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");
@@ -205,6 +221,7 @@ public partial class CinemaDbContext : DbContext
             entity.Property(e => e.ColumnsCount).HasColumnName("columns_count");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
+                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("description");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
@@ -241,7 +258,9 @@ public partial class CinemaDbContext : DbContext
                 .HasMaxLength(10)
                 .HasDefaultValueSql("'早場'::character varying")
                 .HasColumnName("name");
-            entity.Property(e => e.Time).HasColumnName("time");
+            entity.Property(e => e.Time)
+                .HasDefaultValueSql("CURRENT_TIME")
+                .HasColumnName("time");
         });
 
         modelBuilder.Entity<Ticket>(entity =>
@@ -263,12 +282,14 @@ public partial class CinemaDbContext : DbContext
                 .HasColumnName("price");
             entity.Property(e => e.RefundReason)
                 .HasMaxLength(500)
+                .HasDefaultValueSql("''::character varying")
                 .HasColumnName("refund_reason");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
             entity.Property(e => e.TicketType)
                 .HasMaxLength(20)
+                .HasDefaultValueSql("'全票'::character varying")
                 .HasColumnName("ticket_type");
         });
 
