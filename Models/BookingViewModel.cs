@@ -1,6 +1,6 @@
 ﻿using Backend.Data;
 
-namespace Backend.ViewModels
+namespace Backend.Models
 {
     public class BookingViewModel
     {
@@ -31,25 +31,7 @@ namespace Backend.ViewModels
         }
 
         public List<Hall> Halls { get; set; } = null!;
-        public List<ShowtimeSlot> ShowtimeSlots { get; set; } = null!;
-        //public int? HallId { get; set; }
-        //public int? SeatLayoutId { get; set; }
-        //public string? HallName { get; set; }
-        //public string? HallDescription { get; set; }
-        //public int? SeatId { get; set; }
-        //public int? RowNumber { get; set; }
-        //public int? ColNumber { get; set; }
-        //public string? Label { get; set; }
-        //public string? Type { get; set; }
-        //public bool? IsActive { get; set; }
-        //public bool? IsAisle { get; set; }
-        //public int? ShowtimeId { get; set; }
-        //public int? ShowtimeSlotId { get; set; }
-        //public string? ShowtimeSlotName { get; set; }
-        //public TimeOnly? ShowtimeSlotTime { get; set; }
-        //public int? ReservationId { get; set; }
-        //public int? TicketId { get; set; }
-        //public DateOnly? ReservationAt { get; set; }
-        //public string? SeatStatus { get; set; }
+        public List<Showtime> ShowTimes { get; set; } = null!;
+        public List<Seat> Seats { get; set; } = null!;
     }
 }

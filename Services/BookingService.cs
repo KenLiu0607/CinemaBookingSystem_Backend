@@ -1,6 +1,5 @@
-﻿using Backend.Data;
-using Backend.Models.ViewModels;
-using Backend.ViewModels;
+using Backend.Data;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
@@ -47,11 +46,11 @@ namespace Backend.Services
                     EndDate = m.EndDate,
 
                     HallId = h.Id,
-                    SeatLayoutId = h.SeatLayoutId,
                     HallName = h.Name,
                     HallDescription = h.Description,
 
                     SeatId = s.Id,
+                    SeatLayoutId = h.SeatLayoutId,
                     RowNumber = s.RowNumber,
                     ColNumber = s.ColNumber,
                     Label = s.Label,
@@ -68,7 +67,7 @@ namespace Backend.Services
                     TicketId = res.TicketId,
                     ReservationAt = res.ReservationAt,
 
-                    SeatStatus = res.TicketId != null ? "已售出"
+                    SeatStatus = res.SeatId != null ? "已售出"
                                : s.IsActive ? "開放預售"
                                : "不開放"
                 };
@@ -98,29 +97,51 @@ namespace Backend.Services
                         bookVW.StartDate = movie.StartDate;
                         bookVW.EndDate = movie.EndDate;
                     }
-                    var halls = s
+                    List<Hall> halls = s
                         .Select(h => new Hall
                         {
                             Id = h.HallId,
                             SeatLayoutId = h.SeatLayoutId,
-                            Name = h.HallName = null!,
-                            Description = h.HallDescription
+                            Name = h.HallName ?? "",
+                            Description = h.HallDescription ?? ""
                         })
                         .DistinctBy(d => d.Id)
                         .OrderBy(o => o.Id)
                         .ToList();
-                    var showtimeSlots = s
-                        .Select(st => new ShowtimeSlot
+                    List<Showtime> showtimes = s
+                        .Select(st => new Showtime
                         {
-                            Id = st.ShowtimeSlotId,
-                            Name = st.ShowtimeSlotName = null!,
-                            Time = st.ShowtimeSlotTime
+                            Id = st.ShowtimeId,
+                            MovieId = st.MovieId,
+                            HallId = st.HallId,
+                            ShowtimeSlotId = st.ShowtimeSlotId,
+                            ShowtimeSlotName = st.ShowtimeSlotName ?? "",
+                            ShowtimeSlotTime = st.ShowtimeSlotTime.ToString("hh:mm:ss"),
                         })
                         .DistinctBy(d => d.Id)
-                        .OrderBy(o => o.Time)
+                        .OrderBy(o => o.Id)
                         .ToList();
+                    List<Seat> seats = s
+                        .Select(seat => new Seat
+                        {
+                            Id = seat.SeatId,
+                            SeatLayoutId = seat.SeatLayoutId,
+                            RowNumber = seat.RowNumber,
+                            ColNumber = seat.ColNumber,
+                            Label = seat.Label ?? "",
+                            Type = seat.Type ?? "",
+                            IsActive = seat.IsActive,
+                            IsAisle = seat.IsAisle,
+                            SeatStatus = seat.SeatStatus ?? "不開放",
+                            TicketId = seat.TicketId,
+                        })
+                        .DistinctBy(d => d.Id)
+                        .OrderBy(o => o.Id)
+                        .ToList();
+
                     bookVW.Halls = halls;
-                    bookVW.ShowtimeSlots = showtimeSlots;
+                    bookVW.ShowTimes = showtimes;
+                    bookVW.Seats = seats;
                     return bookVW;
                 }).ToList();
 

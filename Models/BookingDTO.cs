@@ -1,4 +1,4 @@
-﻿namespace Backend.Models.ViewModels
+﻿namespace Backend.Models
 {
     public class BookingDTO
     {
@@ -13,10 +13,10 @@
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public int HallId { get; set; }
-        public int SeatLayoutId { get; set; }
         public string? HallName { get; set; }
         public string? HallDescription { get; set; }
         public int SeatId { get; set; }
+        public int SeatLayoutId { get; set; }
         public int RowNumber { get; set; }
         public int ColNumber { get; set; }
         public string? Label { get; set; }
