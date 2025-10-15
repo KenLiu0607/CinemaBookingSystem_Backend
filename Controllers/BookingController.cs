@@ -13,6 +13,7 @@ namespace Backend.Controllers
 
         public BookingController(BookingService bookingService)
         {
+            //測試booking
             _bookingService = bookingService;
         }
 
