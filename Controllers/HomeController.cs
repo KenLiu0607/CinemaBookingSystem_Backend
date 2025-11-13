@@ -1,7 +1,7 @@
-using Backend.Data;
+﻿using Backend.Data;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using OpenAI;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -20,6 +20,17 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<Movie>>> GetMovies()
         {
             List<Movie> result = await _homeService.GetMoviesAsync();
+
+            //ChatClient client = new(model: "gpt-5-nano", apiKey: Environment.GetEnvironmentVariable("Cinema_RAG"));
+
+            //ChatCompletion completion = client.CompleteChat("這是一個測試");
+
+            //string content = completion.Content[0].Text;
+
+            //OpenAIClient client = new(Environment.GetEnvironmentVariable("Cinema_RAG"));
+
+
+
             return Ok(result);
         }
     }

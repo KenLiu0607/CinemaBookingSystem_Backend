@@ -126,7 +126,7 @@ namespace Backend.Services
                                 Type = seat.Type ?? "",
                                 IsActive = seat.IsActive,
                                 IsAisle = seat.IsAisle,
-                                SeatStatus = seat.SeatStatus ?? "不開放",
+                                SeatStatus = seat.SeatStatus,
                             }).DistinctBy(d => d.Id).OrderBy(o => o.Id).ToList(),
                             //場次資訊
                             Showtimes = s.Where(ww => ww.HallId == h.HallId).Select(st => new Showtime

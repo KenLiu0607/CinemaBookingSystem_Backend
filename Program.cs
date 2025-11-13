@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Services;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,11 @@ builder.Services.AddDbContext<CinemaDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddAllServices();
-
+builder.Services.AddSingleton<ChatClient>(serviceProvider =>
+{
+    var apiKey = Environment.GetEnvironmentVariable("Cinema_RAG");
+    return new ChatClient(apiKey: apiKey, model: "gpt-5-nano");
+});
 
 
 var app = builder.Build();
