@@ -1,11 +1,5 @@
-﻿using Backend.Data;
-using Backend.Models;
-using Backend.Services;
-using Microsoft.AspNetCore.Mvc;
-using OpenAI;
+﻿using Microsoft.AspNetCore.Mvc;
 using OpenAI.Chat;
-using System.ClientModel;
-using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace Backend.Controllers
@@ -39,7 +33,7 @@ namespace Backend.Controllers
                 prompt = new
                 {
                     id = "pmpt_691697d2bd8c8193866f7f27f91c47290c4a13228f9a6dbc",
-                    version = "13",
+                    version = "15",
                     variables = new { action = "查詢" }
 
                 },
@@ -53,7 +47,7 @@ namespace Backend.Controllers
                             new
                             {
                                 type = "input_text",
-                                text = "你能提供甚麼服務?"
+                                text = "幫我查有哪些大廳可以使用"
                             }
                         }
                     }
@@ -63,8 +57,8 @@ namespace Backend.Controllers
             };
 
             StringContent content = new(JsonSerializer.Serialize(body), System.Text.Encoding.UTF8, "application/json");
-            //HttpResponseMessage response = await client.PostAsync("https://api.openai.com/v1/responses", content);
-            //string? json1 = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage response = await client.PostAsync("https://api.openai.com/v1/responses", content);
+            string? json1 = await response.Content.ReadAsStringAsync();
 
             string json = @"{
   ""id"": ""resp_008fcb5a53f810b000691ac0ffe478819793c87ef571f6ce8c"",
@@ -194,61 +188,230 @@ namespace Backend.Controllers
 
 
             JsonDocument root = JsonDocument.Parse(json);
-            var outputs = root.RootElement.GetProperty("output");
 
-            foreach (var output in outputs.EnumerateArray())
+            if (root.RootElement.TryGetProperty("output", out JsonElement outputElem))
             {
-                if (output.GetProperty("type").GetString() == "function_call")
-                {
-                    var functionName = output.GetProperty("name").GetString();
-                    var argsJson = output.GetProperty("arguments").GetString();
-                    var callId = output.GetProperty("call_id").GetString();
-
-                    if (output.TryGetProperty("arguments", out JsonElement argsElement))
+                UnionTypes outputUnion = new(outputElem);
+                outputUnion.Match<OpenAIOutputItem>
+                (
+                    onObject: (obj) =>
                     {
-                        string args = argsElement.GetString();
+                        if (obj.Type?.ToLower() == "function_call")
+                        {
+                            switch (obj.Name)
+                            {
+                                case "get_movies":
+                                    break;
+                                case "get_showtimes":
+                                    break;
+                                case "get_halls":
+                                    break;
+                            }
+                        }
+                    },
+                    onArray: (list) =>
+                    {
+                        foreach(OpenAIOutputItem item in list)
+                        {
+                            if (item.Type?.ToLower() == "function_call")
+                            {
+
+                                switch (item.Name)
+                                {
+                                    case "get_movies":
+                                        //GetMoviesArgs? args = JsonSerializer.Deserialize<GetMoviesArgs>(item.Arguments!, _options);
+                                        //if (args != null)
+                                        //{
+                                        //    Console.WriteLine($"Function Call - get_movies: keyword={args.Keyword}, status={args.Status}");
+                                        //}
+                                        break;
+                                    case "get_reservation":
+                                        break;
+                                    case "get_halls":
+                                        break;
+                                }
+                            }
+                        }
+                        Console.WriteLine("Output is an array with " + list.Count + " items.");
                     }
-
-                    //// 轉成 C# 物件
-                    //var args = JsonSerializer.Deserialize<GetMoviesArgs>(argsJson);
-
-                    //if (functionName == "get_movies")
-                    //{
-                    //    var result = await GetMovies(args.keyword, args.status);
-
-                    //    // 第二回合要回傳給 AI
-                    //    await SendFunctionResultToAI(callId, result);
-                    //}
-                }
+                );
             }
-            //OpenAIResponseRoot root = JsonSerializer.Deserialize<OpenAIResponseRoot>(json) ?? new OpenAIResponseRoot();
 
-            //foreach (OpenAIOutputItem item in root.Output)
-            //{
-            //    if (item.Type == "function_call")
-            //    {
-            //        string functionName = item.Name;
-            //        string callId = item.Call_Id;
-            //        string argumentsJson = item.Arguments;
+            //return Ok(json);
+            return Ok(json1);
+        }
+        public void FunctionCall<T>(string function_name, params (string key, object? value)[] args)
+        {
+            var arguments = new Dictionary<string, object?>();
+            foreach (var (key, value) in args)
+            {
+                arguments[key] = value;
+            }
+            string argsJson = JsonSerializer.Serialize(arguments);
 
-            //        GetMoviesArgs args = JsonSerializer.Deserialize<GetMoviesArgs>(argumentsJson);
+        }
 
-            //        if (functionName == "get_movies")
-            //        {
-            //            object result = await GetMoviesAsync(args.Keyword, args.Status);
-            //            await SendFunctionResultToAIAsync(callId, result);
-            //        }
-            //    }
-            //}
-            return Ok(json);
+        /// <summary>
+        /// 找出所有可能的硬幣組合，使其總和為目標值
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("coins")]
+        public IEnumerable<int[]> FindCoinCombinations()
+        {
+            int target = 10;
+            int[] coins = new[] { 1, 3, 5 };
+            var results = new List<int[]>();
+            int n = coins.Length;
+
+            void DFS(int index, int currentSum, int[] counts)
+            {
+                // 若剛好達到目標
+                if (currentSum == target)
+                {
+                    results.Add((int[])counts.Clone());
+                    return;
+                }
+
+                // 若已超過或沒有更多硬幣 → 終止
+                if (currentSum > target || index == n)
+                    return;
+
+                int coin = coins[index];
+                int maxCount = target / coin;
+
+                for (int c = 0; c <= maxCount; c++)
+                {
+                    counts[index] = c;
+                    DFS(index + 1, currentSum + c * coin, counts);
+                }
+
+                counts[index] = 0; // 回溯
+            }
+
+            DFS(0, 0, new int[n]);
+
+            // 若完全沒有可能組合 → 回傳 -1
+            if (results.Count == 0)
+                return new List<int[]> { new[] { -1 } };
+
+            return results;
         }
     }
 
-    public class OpenAIResponseRoot
-    {
-        public List<OpenAIOutputItem>? Output { get; set; }
-    }
 
+    /// <summary>
+    /// Union Types 支援類別
+    /// </summary>
+    public class UnionTypes
+    {
+        /// <summary>
+        /// JSON 元素
+        /// </summary>
+        private readonly JsonElement _jsonElement;
+        private readonly JsonValueKind _kind;
+        /// <summary>
+        /// 建構式
+        /// </summary>
+        /// <param name="jsonElement"></param>
+        public UnionTypes(JsonElement jsonElement)
+        {
+            _jsonElement = jsonElement;
+            _kind = jsonElement.ValueKind;
+        }
+        /// <summary>
+        /// 是否為 null 或未定義
+        /// </summary>
+        public bool IsNull => _kind == JsonValueKind.Null || _kind == JsonValueKind.Undefined;
+        /// <summary>
+        /// 是否為物件
+        /// </summary>
+        public bool IsObject => _kind == JsonValueKind.Object;
+        /// <summary>
+        /// 是否為陣列
+        /// </summary>
+        public bool IsArray => _kind == JsonValueKind.Array;
+        /// <summary>
+        /// 是否為字串
+        /// </summary>
+        public bool IsString => _kind == JsonValueKind.String;
+        /// <summary>
+        /// 是否為數字
+        /// </summary>
+        public bool IsNumber => _kind == JsonValueKind.Number;
+        /// <summary>
+        /// 是否為布林值
+        /// </summary>
+        public bool IsBoolean => _kind == JsonValueKind.True || _kind == JsonValueKind.False;
+        /// <summary>
+        /// 是否為原始類型（字串、數字、布林值）
+        /// </summary>
+        public bool IsPrimitive => IsString || IsNumber || IsBoolean;
+
+
+        /// <summary>
+        /// Union Types模式匹配
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="onNull"></param>
+        /// <param name="onObject"></param>
+        /// <param name="onArray"></param>
+        /// <param name="onString"></param>
+        /// <param name="onNumber"></param>
+        /// <param name="onBoolean"></param>
+        public void Match<T>
+        (
+            Action? onNull = null,
+            Action<T>? onObject = null,
+            Action<List<T>>? onArray = null,
+            Action<string>? onString = null,
+            Action<double>? onNumber = null,
+            Action<bool>? onBoolean = null
+        )
+        {
+            //1. 判斷是否為 Null
+            if (IsNull)
+            {
+                onNull?.Invoke();
+                return;
+            }
+            //2. 判斷是否為物件
+            if (IsObject)
+            {
+                T obj = JsonSerializer.Deserialize<T>(_jsonElement.GetRawText())!;
+                onObject?.Invoke(obj);
+                return;
+            }
+            //3. 判斷是否為陣列
+            if (IsArray)
+            {
+                List<T> list = new();
+                foreach (var item in _jsonElement.EnumerateArray())
+                {
+                    T obj = JsonSerializer.Deserialize<T>(item.GetRawText())!;
+                    list.Add(obj);
+                }
+                onArray?.Invoke(list);
+                return;
+            }
+            //4. 判斷是否為原始類型
+            if (IsPrimitive)
+            {
+                switch (_jsonElement.ValueKind)
+                {
+                    case JsonValueKind.String:
+                        onString?.Invoke(_jsonElement.GetString()!);
+                        break;
+                    case JsonValueKind.Number:
+                        onNumber?.Invoke(_jsonElement.GetDouble());
+                        break;
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                        onBoolean?.Invoke(_jsonElement.GetBoolean());
+                        break;
+                }
+            }
+        }
+    }
 
     public class OpenAIOutputItem
     {
@@ -261,25 +424,21 @@ namespace Backend.Controllers
         [JsonPropertyName("status")]
         public string? Status { get; set; }
 
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
+        [JsonPropertyName("arguments")]
+        public string? Arguments { get; set; }
 
         [JsonPropertyName("call_id")]
         public string? CallId { get; set; }
 
-        [JsonPropertyName("arguments")]
-        public string? Arguments { get; set; }
-
-        [JsonPropertyName("summary")]
-        public List<object>? Summary { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
     }
 
-
-    public class GetMoviesArgs
-    {
-        public string? Keyword { get; set; }
-        public string? Status { get; set; }
-    }
+    //public class GetMoviesArgs
+    //{
+    //    public string? Keyword { get; set; }
+    //    public string? Status { get; set; }
+    //}
 
 
 }
